@@ -1,0 +1,21 @@
+AllCops:
+  TargetRubyVersion: 2.7.0
+  Exclude:
+    - linked_list.gemspec
+    - vendor/**/*
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+Metrics/LineLength:
+  Max: 80
+  IgnoredPatterns: ['(\A|\s+)#']
+Metrics/ClassLength:
+  Max: 105
+Metrics/MethodLength:
+  Max: 15
+Style/HashEachMethods:
+  Enabled: true
+Style/HashTransformKeys:
+  Enabled: true
+Style/HashTransformValues:
+  Enabled: true
