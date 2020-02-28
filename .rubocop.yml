@@ -1,18 +1,25 @@
 AllCops:
   TargetRubyVersion: 2.7.0
   Exclude:
+    - benchmark/benchmark.rb
     - linked_list.gemspec
     - vendor/**/*
+Metrics/AbcSize:
+  Max: 20
 Metrics/BlockLength:
   Exclude:
     - spec/**/*
+Metrics/CyclomaticComplexity:
+  Max: 7
 Metrics/LineLength:
   Max: 80
   IgnoredPatterns: ['(\A|\s+)#']
 Metrics/ClassLength:
-  Max: 105
+  Max: 150
 Metrics/MethodLength:
   Max: 15
+Metrics/PerceivedComplexity:
+  Max: 8
 Style/HashEachMethods:
   Enabled: true
 Style/HashTransformKeys:

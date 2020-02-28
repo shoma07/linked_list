@@ -78,8 +78,16 @@ RSpec.describe LinkedList do
     let(:nth) { nil }
     subject { -> { list.insert(nth, 10) } }
     context 'exist index' do
-      let(:nth) { 2 }
-      it { is_expected.to change { list.at(nth) }.from(2).to(10) }
+      context 'nth is 0' do
+        let(:nth) { 0 }
+        it { is_expected.to change { list.at(nth) }.from(1).to(10) }
+        it { is_expected.to change { list.length }.from(5).to(6) }
+      end
+      context 'nth is 2' do
+        let(:nth) { 2 }
+        it { is_expected.to change { list.at(nth) }.from(2).to(10) }
+        it { is_expected.to change { list.length }.from(5).to(6) }
+      end
     end
     context 'not exist index' do
       let(:nth) { -10 }
@@ -93,9 +101,18 @@ RSpec.describe LinkedList do
   end
 
   describe '#delete_at' do
-    subject { -> { list.delete_at(2) } }
-    it { is_expected.to change { list.at(2) }.from(2).to(5) }
-    it { is_expected.to change { list.length }.from(5).to(4) }
+    let(:pos) { nil }
+    subject { -> { list.delete_at(pos) } }
+    context 'pos is 0' do
+      let(:pos) { 0 }
+      it { is_expected.to change { list.at(pos) }.from(1).to(3) }
+      it { is_expected.to change { list.length }.from(5).to(4) }
+    end
+    context 'pos is 2' do
+      let(:pos) { 2 }
+      it { is_expected.to change { list.at(pos) }.from(2).to(5) }
+      it { is_expected.to change { list.length }.from(5).to(4) }
+    end
   end
 
   describe '#shift' do

@@ -1,6 +1,6 @@
 # LinkedList
 
-Implementing linked list in Ruby
+Implementing linked list(doubly and circularly) in Ruby
 
 ## Installation
 
