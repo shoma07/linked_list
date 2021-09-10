@@ -3,7 +3,5 @@
 require 'linked_list/version'
 require 'linked_list/list'
 
-module LinkedList
-  class Error < StandardError; end
-  # Your code goes here...
-end
+# LinkedList
+module LinkedList; end

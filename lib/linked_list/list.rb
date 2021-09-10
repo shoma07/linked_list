@@ -7,191 +7,181 @@ module LinkedList
 
     # LinkedList::Node
     class Node
-      attr_reader :data
+      # @!attribute [r] item
+      # @return [Object]
+      attr_reader :item
+      # @!attribute [rw] next
+      # @return [Object]
       attr_accessor :next
+      # @!attribute [rw] prev
+      # @return [Object]
       attr_accessor :prev
 
-      # @param [Object] data
+      # @param item [Object]
       # @return [LinkedList::Node]
-      def initialize(data)
-        @data = data
-        @next = nil
-        @prev = nil
+      def initialize(item)
+        @item = item
+      end
+
+      # @param prev [Node]
+      # @param nxt [Node]
+      # @return [void]
+      def assign(prev, nxt)
+        @prev = prev
+        @next = nxt
       end
     end
 
     private_constant :Node
 
     class << self
-      # @param [Array] array
+      # @param array [Array]
       # @return [LinkedList::List]
       def from_array(array)
-        l = new
-        array.each do |data|
-          l.append(data)
-        end
-        l
+        array.each_with_object(new) { |item, result| result.append(item) }
       end
     end
 
-    # @param [Object] data
+    # @!attribute [r] length
+    # @return [Integer]
+    attr_reader :length
+
+    # @param item [Object]
     # @return [LinkedList::List]
-    def initialize(data = nil)
-      @length = 0
-      append(data) if data
+    def initialize(item = nil)
+      item&.then { |i| append(i) }
+      self.length = 0
     end
 
-    def each(&block)
-      if block
-        node = @head
-        while node
-          block.call(node.data)
-          node = node.next != @head ? node.next : nil
-        end
+    # @param block [Proc]
+    # @return [void]
+    def each
+      return self unless block_given?
+
+      loop.inject(head) do |node, _i|
+        break unless node
+
+        yield(node.item)
+        node.next == head ? break : node.next
       end
-
-      self
     end
 
-    # @param [Integer] nth
-    # @return [Object]
-    # @return [NilClass]
+    # @param nth [Integer]
+    # @return [Object, nil]
     def at(nth)
-      at_node(nth)&.data
+      at_node(nth)&.item
     end
 
-    # @return [Object]
-    # @return [NilClass]
+    # @return [Object, nil]
     def first
-      @head&.data
+      head&.item
     end
 
-    # @return [Object]
-    # @return [NilClass]
+    # @return [Object, nil]
     def last
-      @head.prev&.data
+      head&.prev&.item
     end
 
-    # @param [Object] data
+    # @param item [Object]
     # @return [LinkedList::List]
-    def append(data)
-      if @head
-        @head.prev.next = Node.new(data)
-        @head.prev.next.prev = @head.prev
-        @head.prev.next.next = @head
-        @head.prev = @head.prev.next
-      else
-        @head = Node.new(data)
-        @head.next = @head
-        @head.prev = @head
-      end
-      len_increment
-
+    def append(item)
+      head&.then do |node|
+        node.prev.next = Node.new(item).tap { |nd| nd.assign(node.prev, node) }
+        node.prev = node.prev.next
+      end || init_head(item)
+      increment
       self
     end
 
-    # @param [Integer] nth
-    # @param [Object] obj
+    # @param nth [Integer]
+    # @param obj [Object]
     # @return [LinkedList::List]
     # @raise [IndexError]
     def insert(nth, obj)
-      node = at_node(nth)
-      return raise IndexError unless node
+      at_node(nth)&.then do |node|
+        next unshift(obj) if node == head
 
-      if node == @head
-        unshift(obj)
-      else
-        node.prev.next = Node.new(obj)
-        node.prev.next.prev = node.prev
-        node.prev.next.next = node
+        node.prev.next = Node.new(obj).tap { |new_node| new_node.assign(node.prev, node) }
         node.prev = node.prev.next
-        len_increment
-      end
-
+        increment
+      end || (raise IndexError)
       self
     end
 
-    # @return [NilClass]
+    # @return [nil]
     def clear
-      @head = nil
+      self.head = nil
     end
 
-    # @param [Integer] pos
-    # @return [Object]
-    # @return [NilClass]
+    # @param pos [Integer]
+    # @return [Object, nil]
     def delete_at(pos)
-      node = at_node(pos)
-      return unless node
+      at_node(pos)&.then do |node|
+        next shift if node == head
 
-      data = nil
-      if node == @head
-        data = shift
-      else
-        data = node&.data
-        node.prev.next = node.next
-        node.next.prev = node.prev
-        len_decrement
+        decrement
+        node.item.tap do
+          node.prev.next = node.next
+          node.next.prev = node.prev
+        end
       end
-
-      data
     end
 
-    attr_reader :length
-
-    # @return [Object]
-    # @return [NilClass]
+    # @return [Object, nil]
     def shift
-      return unless @head
-
-      data = @head&.data
-      @head.prev.next = @head.next
-      @head.next.prev = @head.prev
-      @head = @head.next
-      len_decrement
-      data
+      head&.then do |node|
+        node.item.tap do
+          decrement
+          node.prev.next = node.next
+          node.next.prev = node.prev
+          self.head = node.next
+        end
+      end
     end
 
-    # @param [Object] obj
+    # @param obj [Object]
     # @return [LinkedList::List]
     def unshift(obj)
       append(obj)
-      @head = @head.prev
-
+      self.head = head.prev
       self
     end
 
     private
 
-    # @param [Integer] nth
-    # @param [Node] node
-    def at_node(nth)
-      idx = nth.negative? ? length + nth : nth
-      return if idx.negative? || idx > length - 1
+    # @!attribute [rw] head
+    # @return [Node]
+    attr_accessor :head
+    # @!attribute [w] length
+    # @return [Integer]
+    attr_writer :length
 
-      node = @head
-      if idx > length / 2
-        until idx == length
-          idx += 1
-          node = node.prev
-        end
-      else
-        until idx.zero?
-          idx -= 1
-          node = node.next
+    # @param item [Object]
+    # @return [Node]
+    def init_head(item)
+      self.head = Node.new(item).tap { |node| node.assign(node, node) }
+    end
+
+    # @param nth [Integer]
+    # @return node [Node]
+    def at_node(nth)
+      length.then do |len|
+        (nth.negative? ? len + nth : nth).then do |idx|
+          next if idx.negative? || idx > len - 1
+
+          idx.upto(length - 1).inject(head) { |result, _i| result.prev }
         end
       end
-
-      node
     end
 
     # @return [Integer]
-    def len_increment
-      @length += 1
+    def increment
+      self.length += 1
     end
 
     # @return [Integer]
-    def len_decrement
-      @length -= 1
+    def decrement
+      self.length -= 1
     end
 
     alias push append
