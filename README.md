@@ -7,8 +7,7 @@ Implementing linked list(doubly and circularly) in Ruby
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'linked_list', git: 'https://github.com/shoma07/linked_list.git',
-                   branch: 'master'
+gem 'linked_list', git: 'https://github.com/shoma07/linked_list.git', branch: 'main'
 ```
 
 And then execute:
